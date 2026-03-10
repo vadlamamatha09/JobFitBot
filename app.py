@@ -36,4 +36,5 @@ if st.button("Predict Job"):
 }
 
 prediction = model.predict([skills])
-st.success(f"Recommended Job Role: {job_roles.get(prediction[0], 'Unknown Role')}")
+predicted_value=int(prediction[0])
+st.success("Recommended Job Role:"+job_roles.get(predicted_value,"Unknown Role"))
