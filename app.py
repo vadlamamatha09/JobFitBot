@@ -21,5 +21,7 @@ if st.button("Predict Job"):
     cert = 1 if certification=="yes" else 0
 
     prediction = model.predict([[edu,skill,cert,experience]])
+    if st.button("Predict Job Role"):
+        prediction=model.predict([skills])
 
-    st.success("You are eligible for a suitable job role!")
+    st.success(f"Recommended Job Role:{prediction[0]}")
