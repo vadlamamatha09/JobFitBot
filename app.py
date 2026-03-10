@@ -22,6 +22,18 @@ if st.button("Predict Job"):
 
     prediction = model.predict([[edu,skill,cert,experience]])
     if st.button("Predict Job Role"):
-        prediction=model.predict([skills])
+        job_roles = {
+1: "Data Scientist",
+2: "Data Analyst",
+3: "Frontend Developer",
+4: "Backend Developer",
+5: "AI Engineer",
+6: "Machine Learning Engineer",
+7: "Web Developer",
+8: "Software Developer",
+9: "Test Engineer",
+10: "DevOps Engineer"
+}
 
-    st.success(f"Recommended Job Role:{prediction[0]}")
+prediction = model.predict([skills])
+st.success(f"Recommended Job Role: {job_roles.get(prediction[0], 'Unknown Role')}")
