@@ -1,5 +1,7 @@
-
 import streamlit as st
+
+st.title("🤖 JobFitBot - AI Job Role Predictor")
+st.write("This application predicts the most suitable job role based on user skills using Machine Learning.")
 import pickle
 
 with open("jobfit_model.pkl","rb") as file:
