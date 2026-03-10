@@ -33,24 +33,28 @@ if st.button("Predict Job Role"):
     cert = 1 if certification == "yes" else 0
 
     features = np.array([[edu, skill, cert, experience]])
+    skills_lower = skills.lower()
 
-    prediction = model.predict(features)
+if "machine learning" in skills_lower or "deep learning" in skills_lower:
+    role = "Machine Learning Engineer"
 
-    job_roles = {
-        0:"Data Scientist",
-        1:"Data Analyst",
-        2:"Frontend Developer",
-        3:"Backend Developer",
-        4:"AI Engineer",
-        5:"Machine Learning Engineer",
-        6:"Web Developer",
-        7:"Software Developer",
-        8:"Test Engineer",
-        9:"DevOps Engineer"
-    }
+elif "python" in skills_lower and "statistics" in skills_lower:
+    role = "Data Scientist"
 
-    role = job_roles.get(int(prediction[0]),"Software Developer")
+elif "sql" in skills_lower or "excel" in skills_lower:
+    role = "Data Analyst"
 
+elif "html" in skills_lower or "css" in skills_lower or "javascript" in skills_lower:
+    role = "Frontend Developer"
+
+elif "java" in skills_lower or "spring" in skills_lower:
+    role = "Backend Developer"
+
+elif "docker" in skills_lower or "kubernetes" in skills_lower:
+    role = "DevOps Engineer"
+
+else:
+    role = "Software Developer"
     score = random.randint(70,95)
 
     st.success(f"🎯 Recommended Job Role: {role}")
