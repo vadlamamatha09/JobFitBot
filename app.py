@@ -2,7 +2,8 @@
 import streamlit as st
 import pickle
 
-model = pickle.load(open("jobfit_model.pkl","rb"))
+with open("jobfit_model.pkl","rb") as file:
+    model=pickle.load(file)
 
 st.title("JobFitBot - Job Eligibility Predictor")
 
