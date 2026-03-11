@@ -22,47 +22,96 @@ certification = st.selectbox("Certification",["Yes","No"])
 experience = st.slider("Years of Experience",0,10)
 
 # ---------------- JOB DATABASE ----------------
-
 job_roles = {
 
-"Data Scientist":["python","machine learning","statistics","pandas","numpy"],
-"Machine Learning Engineer":["python","ml","deep learning","tensorflow","pytorch"],
-"AI Engineer":["python","nlp","deep learning","computer vision"],
+# AI & Data
+"Data Scientist":["python","machine learning","statistics","pandas","numpy","data analysis"],
+"Machine Learning Engineer":["python","machine learning","deep learning","tensorflow","pytorch"],
+"AI Engineer":["python","deep learning","nlp","computer vision"],
 "Data Analyst":["excel","sql","power bi","tableau","data analysis"],
-"Business Analyst":["excel","sql","business analysis","communication"],
+"Data Engineer":["python","sql","spark","hadoop","etl"],
+"Business Intelligence Analyst":["power bi","tableau","sql","data visualization"],
+"Statistician":["statistics","r","data analysis"],
 
+# Software Development
+"Software Developer":["java","python","c++","algorithms","data structures"],
 "Frontend Developer":["html","css","javascript","react","angular"],
-"Backend Developer":["java","python","node","spring","databases"],
+"Backend Developer":["java","python","node","spring","api"],
 "Full Stack Developer":["html","css","javascript","node","react","mongodb"],
-"Software Developer":["java","python","c++","algorithms"],
-"Web Developer":["html","css","javascript","php"],
-
-"DevOps Engineer":["docker","kubernetes","linux","aws","ci/cd"],
-"Cloud Engineer":["aws","azure","cloud","terraform"],
-
-"Cyber Security Analyst":["cyber security","network security","ethical hacking"],
-"Penetration Tester":["ethical hacking","penetration testing","security"],
-
-"Mobile App Developer":["android","kotlin","flutter","react native"],
+"Web Developer":["html","css","javascript","php","wordpress"],
+"API Developer":["api","python","node","rest"],
 "Game Developer":["unity","c#","game development"],
 
-"Blockchain Developer":["blockchain","solidity","ethereum"],
+# Mobile
+"Mobile App Developer":["android","kotlin","flutter","react native"],
+"Android Developer":["android","kotlin","java"],
+"IOS Developer":["swift","ios","mobile development"],
 
-"UI UX Designer":["figma","ui design","ux design","prototyping"]
-}
+# DevOps & Cloud
+"DevOps Engineer":["docker","kubernetes","linux","aws","ci/cd"],
+"Cloud Engineer":["aws","azure","cloud","terraform","linux"],
+"Site Reliability Engineer":["linux","cloud","monitoring","devops"],
+"Cloud Architect":["cloud","aws","architecture"],
 
-salary_data = {
-"Data Scientist":"₹10L - ₹25L",
-"Machine Learning Engineer":"₹12L - ₹30L",
-"AI Engineer":"₹12L - ₹28L",
-"Data Analyst":"₹5L - ₹12L",
-"Frontend Developer":"₹5L - ₹15L",
-"Backend Developer":"₹6L - ₹18L",
-"Full Stack Developer":"₹7L - ₹20L",
-"Software Developer":"₹6L - ₹16L",
-"DevOps Engineer":"₹10L - ₹25L",
-"Cloud Engineer":"₹12L - ₹28L",
-"Cyber Security Analyst":"₹8L - ₹22L"
+# Cyber Security
+"Cyber Security Analyst":["cyber security","network security","ethical hacking"],
+"Penetration Tester":["ethical hacking","penetration testing","security"],
+"Security Engineer":["security","network","linux"],
+"Security Consultant":["cyber security","risk","security"],
+
+# Blockchain
+"Blockchain Developer":["blockchain","solidity","ethereum","web3"],
+
+# Testing
+"QA Engineer":["testing","automation","selenium","manual testing"],
+"Automation Tester":["selenium","automation testing","python"],
+
+# Design
+"UI UX Designer":["figma","ui design","ux design","prototyping"],
+"Graphic Designer":["photoshop","illustrator","design"],
+"Product Designer":["design","figma","ui","ux"],
+"Animator":["animation","blender","3d"],
+"Video Editor":["video editing","premiere pro","after effects"],
+
+# Business
+"Business Analyst":["excel","sql","business analysis","communication"],
+"Product Manager":["product management","strategy","communication"],
+"Project Manager":["project management","agile","scrum"],
+"Operations Manager":["operations","management","strategy"],
+
+# Marketing
+"Digital Marketing Specialist":["seo","social media","google ads"],
+"SEO Specialist":["seo","analytics","keyword research"],
+"Content Marketing Manager":["content marketing","seo","writing"],
+"Social Media Manager":["social media","marketing","branding"],
+"Brand Manager":["branding","marketing","strategy"],
+
+# Sales
+"Sales Executive":["sales","communication","negotiation"],
+"Sales Manager":["sales","leadership","strategy"],
+"Business Development Manager":["business development","sales","strategy"],
+
+# Finance
+"Financial Analyst":["finance","excel","financial modeling"],
+"Accountant":["accounting","finance","tax"],
+"Investment Banker":["finance","investment","analysis"],
+"Risk Analyst":["risk","finance","analysis"],
+
+# HR
+"HR Executive":["recruitment","hr","communication"],
+"HR Manager":["hr management","recruitment","leadership"],
+"Talent Acquisition Specialist":["recruitment","hiring","communication"],
+
+# Education
+"Teacher":["teaching","communication","subject knowledge"],
+"Lecturer":["teaching","research","presentation"],
+"Professor":["research","teaching","publication"],
+
+# Misc Tech
+"Network Engineer":["networking","routers","switches"],
+"Database Administrator":["sql","database","oracle"],
+"System Administrator":["linux","servers","network"],
+"IT Support Specialist":["technical support","network","troubleshooting"]
 }
 
 # ---------------- RESUME UPLOAD ----------------
@@ -78,64 +127,41 @@ if resume_file is not None:
     st.success("Resume uploaded successfully")
 
 # ---------------- CAREER PREDICTION ----------------
+scores = {}
 
-if st.button("Predict Career"):
+for role, req_skills in job_roles.items():
 
-    user_skills = []
+    match = len(set(user_skills) & set(req_skills))
 
-    # Skills from input
-    if skills_input:
-        user_skills += [s.strip().lower() for s in skills_input.split(",")]
+    score = (match / len(req_skills)) * 100
 
-    # Extract skills from resume silently
-    if resume_text:
+    scores[role] = score
 
-        all_skills=set()
+# Sort roles
+sorted_roles = sorted(scores.items(), key=lambda x: x[1], reverse=True)
 
-        for skills_list in job_roles.values():
-            all_skills.update(skills_list)
+top_roles = sorted_roles[:3]
 
-        for skill in all_skills:
-            if skill in resume_text:
-                user_skills.append(skill)
+st.subheader("🏆 Top Career Recommendations")
 
-    user_skills=list(set(user_skills))
+for role, score in top_roles:
 
-    if not user_skills:
-        st.error("Please enter skills or upload resume")
-        st.stop()
+    score = int(score)
 
-    scores={}
+    st.success(f"🎯 {role}")
+    st.write(f"Eligibility Score: {score}%")
 
-    for role,req_skills in job_roles.items():
+    if role in salary_data:
+        st.write(f"💰 Average Salary: {salary_data[role]}")
 
-        match=len(set(user_skills) & set(req_skills))
-        score=(match/len(req_skills))*100
+    missing = [s for s in job_roles[role] if s not in user_skills]
 
-        scores[role]=score
+    if missing:
+        st.write("📚 Skills to Improve:")
+        for m in missing[:4]:
+            st.write("-", m)
 
-    top_roles=sorted(scores,key=scores.get,reverse=True)[:3]
+    st.write("---")
 
-    st.subheader("🏆 Top Career Recommendations")
+st.balloons()
 
-    for role in top_roles:
-
-        score=int(scores[role]) + random.randint(5,15)
-
-        if score>95:
-            score=95
-
-        st.success(f"🎯 {role}")
-        st.write(f"Eligibility Score: {score}%")
-
-        if role in salary_data:
-            st.write(f"💰 Average Salary: {salary_data[role]}")
-
-        missing=[s for s in job_roles[role] if s not in user_skills]
-
-        if missing:
-            st.write("📚 Skills to Improve:")
-            for m in missing[:4]:
-                st.write("-",m)
-
-        st.write("---")
