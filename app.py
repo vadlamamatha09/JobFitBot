@@ -2,7 +2,7 @@ import streamlit as st
 import random
 
 st.title("🤖 JobFitBot - AI Career Advisor")
-st.write("Find the best career based on your skills and profile")
+st.write("Find the best career based on your skills or resume")
 
 # ---------------- EDUCATION ----------------
 
@@ -15,9 +15,9 @@ branches = {
 "M.Tech":["AI","Data Science","Cyber Security","Software Engineering"]
 }
 
-branch = st.selectbox("Branch",branches[education])
+branch = st.selectbox("Branch", branches[education])
 
-skills = st.text_input("Enter your skills (example: python, sql, machine learning)")
+skills_input = st.text_input("Enter your skills (example: python, sql, machine learning)")
 certification = st.selectbox("Certification",["Yes","No"])
 experience = st.slider("Years of Experience",0,10)
 
@@ -39,56 +39,69 @@ job_roles = {
 
 "DevOps Engineer":["docker","kubernetes","linux","aws","ci/cd"],
 "Cloud Engineer":["aws","azure","cloud","terraform"],
-"Site Reliability Engineer":["linux","cloud","monitoring","devops"],
 
 "Cyber Security Analyst":["cyber security","network security","ethical hacking"],
 "Penetration Tester":["ethical hacking","penetration testing","security"],
-"Security Engineer":["cyber security","network security","python"],
 
 "Mobile App Developer":["android","kotlin","flutter","react native"],
 "Game Developer":["unity","c#","game development"],
 
 "Blockchain Developer":["blockchain","solidity","ethereum"],
-"AR/VR Developer":["unity","vr","ar"],
 
-"UI UX Designer":["figma","ui design","ux design","prototyping"],
-"Product Manager":["product management","analytics","communication"],
-
-"Database Administrator":["sql","oracle","database","mysql"],
-"System Administrator":["linux","networking","servers"],
-
-"Network Engineer":["networking","ccna","routers"],
-"Embedded Engineer":["embedded systems","c","microcontrollers"]
-
+"UI UX Designer":["figma","ui design","ux design","prototyping"]
 }
-
-# Salary estimation (India)
 
 salary_data = {
 "Data Scientist":"₹10L - ₹25L",
 "Machine Learning Engineer":"₹12L - ₹30L",
 "AI Engineer":"₹12L - ₹28L",
 "Data Analyst":"₹5L - ₹12L",
-"Business Analyst":"₹6L - ₹14L",
 "Frontend Developer":"₹5L - ₹15L",
 "Backend Developer":"₹6L - ₹18L",
 "Full Stack Developer":"₹7L - ₹20L",
 "Software Developer":"₹6L - ₹16L",
-"Web Developer":"₹4L - ₹10L",
 "DevOps Engineer":"₹10L - ₹25L",
 "Cloud Engineer":"₹12L - ₹28L",
-"Cyber Security Analyst":"₹8L - ₹22L",
-"Mobile App Developer":"₹6L - ₹18L",
-"Game Developer":"₹5L - ₹12L",
-"Blockchain Developer":"₹15L - ₹40L",
-"UI UX Designer":"₹6L - ₹15L"
+"Cyber Security Analyst":"₹8L - ₹22L"
 }
+
+# ---------------- RESUME UPLOAD ----------------
+
+st.header("Upload Resume (Optional)")
+
+resume_file = st.file_uploader("Upload Resume (txt or pdf)",type=["txt","pdf"])
+
+resume_text = ""
+
+if resume_file is not None:
+    resume_text = resume_file.read().decode("latin-1").lower()
+    st.success("Resume uploaded successfully")
 
 # ---------------- PREDICTION ----------------
 
 if st.button("Predict Career"):
 
-    user_skills = [s.strip().lower() for s in skills.split(",")]
+    user_skills = []
+
+    # Skills from text input
+    if skills_input:
+        user_skills += [s.strip().lower() for s in skills_input.split(",")]
+
+    # Extract skills from resume
+    all_skills = set()
+    for skills_list in job_roles.values():
+        all_skills.update(skills_list)
+
+    if resume_text:
+        for skill in all_skills:
+            if skill in resume_text:
+                user_skills.append(skill)
+
+    user_skills = list(set(user_skills))
+
+    if not user_skills:
+        st.error("Please enter skills or upload resume")
+        st.stop()
 
     scores = {}
 
@@ -106,6 +119,7 @@ if st.button("Predict Career"):
     for role in top_roles:
 
         score = int(scores[role]) + random.randint(5,15)
+
         if score>95:
             score=95
 
@@ -124,17 +138,13 @@ if st.button("Predict Career"):
 
         st.write("-----")
 
-# ---------------- RESUME ANALYSIS ----------------
+# ---------------- DETECTED SKILLS ----------------
 
-st.header("Upload Resume")
+if resume_text:
 
-resume_file = st.file_uploader("Upload Resume (txt or pdf)",type=["txt","pdf"])
+    st.subheader("Skills Detected From Resume")
 
-if resume_file:
-
-    text = resume_file.read().decode("latin-1").lower()
-
-    detected = []
+    detected=[]
 
     all_skills=set()
 
@@ -142,15 +152,9 @@ if resume_file:
         all_skills.update(skills_list)
 
     for skill in all_skills:
-        if skill in text:
+        if skill in resume_text:
             detected.append(skill)
-
-    st.subheader("Detected Skills")
 
     if detected:
         for s in detected:
             st.write("✔",s)
-    else:
-        st.write("No skills detected")
-
-    st.success("Resume analyzed successfully")
