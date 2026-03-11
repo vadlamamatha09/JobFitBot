@@ -69,7 +69,7 @@ salary_data = {
 
 st.header("Upload Resume (Optional)")
 
-resume_file = st.file_uploader("Upload Resume (txt or pdf)",type=["txt","pdf"])
+resume_file = st.file_uploader("Upload Resume (txt or pdf)", type=["txt","pdf"])
 
 resume_text = ""
 
@@ -77,48 +77,50 @@ if resume_file is not None:
     resume_text = resume_file.read().decode("latin-1").lower()
     st.success("Resume uploaded successfully")
 
-# ---------------- PREDICTION ----------------
+# ---------------- CAREER PREDICTION ----------------
 
 if st.button("Predict Career"):
 
     user_skills = []
 
-    # Skills from text input
+    # Skills from input
     if skills_input:
         user_skills += [s.strip().lower() for s in skills_input.split(",")]
 
-    # Extract skills from resume
-    all_skills = set()
-    for skills_list in job_roles.values():
-        all_skills.update(skills_list)
-
+    # Extract skills from resume silently
     if resume_text:
+
+        all_skills=set()
+
+        for skills_list in job_roles.values():
+            all_skills.update(skills_list)
+
         for skill in all_skills:
             if skill in resume_text:
                 user_skills.append(skill)
 
-    user_skills = list(set(user_skills))
+    user_skills=list(set(user_skills))
 
     if not user_skills:
         st.error("Please enter skills or upload resume")
         st.stop()
 
-    scores = {}
+    scores={}
 
     for role,req_skills in job_roles.items():
 
-        match = len(set(user_skills) & set(req_skills))
-        score = (match/len(req_skills))*100
+        match=len(set(user_skills) & set(req_skills))
+        score=(match/len(req_skills))*100
 
-        scores[role] = score
+        scores[role]=score
 
-    top_roles = sorted(scores,key=scores.get,reverse=True)[:3]
+    top_roles=sorted(scores,key=scores.get,reverse=True)[:3]
 
     st.subheader("🏆 Top Career Recommendations")
 
     for role in top_roles:
 
-        score = int(scores[role]) + random.randint(5,15)
+        score=int(scores[role]) + random.randint(5,15)
 
         if score>95:
             score=95
@@ -129,32 +131,11 @@ if st.button("Predict Career"):
         if role in salary_data:
             st.write(f"💰 Average Salary: {salary_data[role]}")
 
-        missing = [s for s in job_roles[role] if s not in user_skills]
+        missing=[s for s in job_roles[role] if s not in user_skills]
 
         if missing:
             st.write("📚 Skills to Improve:")
             for m in missing[:4]:
                 st.write("-",m)
 
-        st.write("-----")
-
-# ---------------- DETECTED SKILLS ----------------
-
-if resume_text:
-
-    st.subheader("Skills Detected From Resume")
-
-    detected=[]
-
-    all_skills=set()
-
-    for skills_list in job_roles.values():
-        all_skills.update(skills_list)
-
-    for skill in all_skills:
-        if skill in resume_text:
-            detected.append(skill)
-
-    if detected:
-        for s in detected:
-            st.write("✔",s)
+        st.write("---")
