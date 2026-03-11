@@ -1,100 +1,156 @@
 import streamlit as st
-import pickle
-import numpy as np
 import random
 
-# Load model
-with open("jobfit_model.pkl","rb") as file:
-    model = pickle.load(file)
-
 st.title("🤖 JobFitBot - AI Career Advisor")
+st.write("Find the best career based on your skills and profile")
 
-st.write("Find the best job role based on your skills or resume.")
+# ---------------- EDUCATION ----------------
 
-# ----- OPTION 1: Manual Input -----
-st.header("Enter Your Details")
+education = st.selectbox("Education", ["B.Tech","Degree","MBA","M.Tech"])
 
-education = st.selectbox("Education", ["BTech","MBA","BSc","MTech","BCA"])
-skills = st.text_input("Enter your skills (example: python, sql, ml)")
-certification = st.selectbox("Certification",["yes","no"])
-experience = st.slider("Years of Experience",0,5)
+branches = {
+"B.Tech":["Computer Science","Information Technology","Electronics","Mechanical","Civil","AI & ML","Data Science"],
+"Degree":["BSc Computer Science","BCom","BBA","BA"],
+"MBA":["Finance","Marketing","HR","Business Analytics"],
+"M.Tech":["AI","Data Science","Cyber Security","Software Engineering"]
+}
 
-# ----- OPTION 2: Resume Upload -----
-st.header("Or Upload Your Resume")
+branch = st.selectbox("Branch",branches[education])
 
-resume_file = st.file_uploader("Upload Resume (txt or pdf)", type=["txt","pdf"])
+skills = st.text_input("Enter your skills (example: python, sql, machine learning)")
+certification = st.selectbox("Certification",["Yes","No"])
+experience = st.slider("Years of Experience",0,10)
 
-if st.button("Predict Job Role"):
+# ---------------- JOB DATABASE ----------------
 
-    edu_dict = {"BTech":0,"MBA":1,"BSc":2,"MTech":3,"BCA":4}
+job_roles = {
 
-    edu = edu_dict[education]
-    skill = 1
-    cert = 1 if certification == "yes" else 0
+"Data Scientist":["python","machine learning","statistics","pandas","numpy"],
+"Machine Learning Engineer":["python","ml","deep learning","tensorflow","pytorch"],
+"AI Engineer":["python","nlp","deep learning","computer vision"],
+"Data Analyst":["excel","sql","power bi","tableau","data analysis"],
+"Business Analyst":["excel","sql","business analysis","communication"],
 
-    features = np.array([[edu, skill, cert, experience]])
-    skills_lower = skills.lower()
-    if "machine learning" in skills_lower or "deep learning" in skills_lower:
-        role = "Machine Learning Engineer"
-    elif "python" in skills_lower and "statistics" in skills_lower:
-        role = "Data Scientist"
-    elif "sql" in skills_lower or "excel" in skills_lower:
-        role = "Data Analyst"
-    elif "html" in skills_lower or "css" in skills_lower or "javascript" in skills_lower:
-        role = "Frontend Developer"
-    elif "java" in skills_lower or "spring" in skills_lower:
-        role = "Backend Developer"
-    elif "docker" in skills_lower or "kubernetes" in skills_lower:
-        role = "DevOps Engineer"
+"Frontend Developer":["html","css","javascript","react","angular"],
+"Backend Developer":["java","python","node","spring","databases"],
+"Full Stack Developer":["html","css","javascript","node","react","mongodb"],
+"Software Developer":["java","python","c++","algorithms"],
+"Web Developer":["html","css","javascript","php"],
+
+"DevOps Engineer":["docker","kubernetes","linux","aws","ci/cd"],
+"Cloud Engineer":["aws","azure","cloud","terraform"],
+"Site Reliability Engineer":["linux","cloud","monitoring","devops"],
+
+"Cyber Security Analyst":["cyber security","network security","ethical hacking"],
+"Penetration Tester":["ethical hacking","penetration testing","security"],
+"Security Engineer":["cyber security","network security","python"],
+
+"Mobile App Developer":["android","kotlin","flutter","react native"],
+"Game Developer":["unity","c#","game development"],
+
+"Blockchain Developer":["blockchain","solidity","ethereum"],
+"AR/VR Developer":["unity","vr","ar"],
+
+"UI UX Designer":["figma","ui design","ux design","prototyping"],
+"Product Manager":["product management","analytics","communication"],
+
+"Database Administrator":["sql","oracle","database","mysql"],
+"System Administrator":["linux","networking","servers"],
+
+"Network Engineer":["networking","ccna","routers"],
+"Embedded Engineer":["embedded systems","c","microcontrollers"]
+
+}
+
+# Salary estimation (India)
+
+salary_data = {
+"Data Scientist":"₹10L - ₹25L",
+"Machine Learning Engineer":"₹12L - ₹30L",
+"AI Engineer":"₹12L - ₹28L",
+"Data Analyst":"₹5L - ₹12L",
+"Business Analyst":"₹6L - ₹14L",
+"Frontend Developer":"₹5L - ₹15L",
+"Backend Developer":"₹6L - ₹18L",
+"Full Stack Developer":"₹7L - ₹20L",
+"Software Developer":"₹6L - ₹16L",
+"Web Developer":"₹4L - ₹10L",
+"DevOps Engineer":"₹10L - ₹25L",
+"Cloud Engineer":"₹12L - ₹28L",
+"Cyber Security Analyst":"₹8L - ₹22L",
+"Mobile App Developer":"₹6L - ₹18L",
+"Game Developer":"₹5L - ₹12L",
+"Blockchain Developer":"₹15L - ₹40L",
+"UI UX Designer":"₹6L - ₹15L"
+}
+
+# ---------------- PREDICTION ----------------
+
+if st.button("Predict Career"):
+
+    user_skills = [s.strip().lower() for s in skills.split(",")]
+
+    scores = {}
+
+    for role,req_skills in job_roles.items():
+
+        match = len(set(user_skills) & set(req_skills))
+        score = (match/len(req_skills))*100
+
+        scores[role] = score
+
+    top_roles = sorted(scores,key=scores.get,reverse=True)[:3]
+
+    st.subheader("🏆 Top Career Recommendations")
+
+    for role in top_roles:
+
+        score = int(scores[role]) + random.randint(5,15)
+        if score>95:
+            score=95
+
+        st.success(f"🎯 {role}")
+        st.write(f"Eligibility Score: {score}%")
+
+        if role in salary_data:
+            st.write(f"💰 Average Salary: {salary_data[role]}")
+
+        missing = [s for s in job_roles[role] if s not in user_skills]
+
+        if missing:
+            st.write("📚 Skills to Improve:")
+            for m in missing[:4]:
+                st.write("-",m)
+
+        st.write("-----")
+
+# ---------------- RESUME ANALYSIS ----------------
+
+st.header("Upload Resume")
+
+resume_file = st.file_uploader("Upload Resume (txt or pdf)",type=["txt","pdf"])
+
+if resume_file:
+
+    text = resume_file.read().decode("latin-1").lower()
+
+    detected = []
+
+    all_skills=set()
+
+    for skills_list in job_roles.values():
+        all_skills.update(skills_list)
+
+    for skill in all_skills:
+        if skill in text:
+            detected.append(skill)
+
+    st.subheader("Detected Skills")
+
+    if detected:
+        for s in detected:
+            st.write("✔",s)
     else:
-        role = "Software Developer"
-    score = random.randint(70,95)
+        st.write("No skills detected")
 
-    st.success(f"🎯 Recommended Job Role: {role}")
-    st.info(f"📊 Eligibility Score: {score}%")
-
-    # Skill suggestions
-    required_skills = {
-        "Data Scientist":["Python","Machine Learning","Statistics"],
-        "Data Analyst":["Excel","SQL","Python"],
-        "Frontend Developer":["HTML","CSS","JavaScript"],
-        "Backend Developer":["Python","Java","Databases"],
-        "AI Engineer":["Python","Deep Learning","TensorFlow"],
-        "Machine Learning Engineer":["Python","ML","Data Processing"],
-        "Web Developer":["HTML","CSS","JavaScript"],
-        "Software Developer":["Java","Python","Problem Solving"],
-        "Test Engineer":["Automation","Testing","Selenium"],
-        "DevOps Engineer":["Docker","Kubernetes","Linux"]
-    }
-
-    user_skills = skills.lower()
-    missing = []
-
-    for skill in required_skills.get(role,[]):
-        if skill.lower() not in user_skills:
-            missing.append(skill)
-
-    if missing:
-        st.warning("Skills to Improve:")
-        for m in missing:
-            st.write("-",m)
-    else:
-        st.success("You already have most required skills!")
-
-# ----- Resume Analysis -----
-if resume_file is not None:
-
-    st.subheader("Resume Analysis")
-
-    resume_text = resume_file.read().decode("latin-1").lower()
-
-    if "python" in resume_text:
-        st.write("✔ Python skill detected")
-
-    if "machine learning" in resume_text:
-        st.write("✔ Machine Learning skill detected")
-
-    if "sql" in resume_text:
-        st.write("✔ SQL skill detected")
-
-    st.success("Resume analyzed successfully!")
+    st.success("Resume analyzed successfully")
