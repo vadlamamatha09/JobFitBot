@@ -2,6 +2,7 @@ import streamlit as st
 import random
 
 st.title("🤖 JobFitBot - AI Career Advisor")
+st.caption("AI-powered career prediction system based on skills and resume analysis")
 st.write("Find the best career based on your skills or resume")
 
 # ---------------- EDUCATION ----------------
@@ -113,6 +114,20 @@ job_roles = {
 "System Administrator":["linux","servers","network"],
 "IT Support Specialist":["technical support","network","troubleshooting"]
 }
+# ---------------- SALARY_DATA ----------------
+salary_data = {
+"Data Scientist":"₹10L - ₹25L",
+"Machine Learning Engineer":"₹12L - ₹30L",
+"AI Engineer":"₹12L - ₹28L",
+"Data Analyst":"₹5L - ₹12L",
+"Software Developer":"₹6L - ₹16L",
+"Frontend Developer":"₹5L - ₹15L",
+"Backend Developer":"₹6L - ₹18L",
+"Full Stack Developer":"₹7L - ₹20L",
+"DevOps Engineer":"₹10L - ₹25L",
+"Cloud Engineer":"₹12L - ₹28L",
+"Cyber Security Analyst":"₹8L - ₹22L"
+}
 
 # ---------------- RESUME UPLOAD ----------------
 
@@ -125,43 +140,68 @@ resume_text = ""
 if resume_file is not None:
     resume_text = resume_file.read().decode("latin-1").lower()
     st.success("Resume uploaded successfully")
-
 # ---------------- CAREER PREDICTION ----------------
-scores = {}
 
-for role, req_skills in job_roles.items():
+if st.button("Predict Career"):
 
-    match = len(set(user_skills) & set(req_skills))
+    user_skills = []
 
-    score = (match / len(req_skills)) * 100
+    # Skills from text input
+    if skills_input:
+        user_skills += [s.strip().lower() for s in skills_input.split(",")]
 
-    scores[role] = score
+    # Skills from resume
+    if resume_text:
 
-# Sort roles
-sorted_roles = sorted(scores.items(), key=lambda x: x[1], reverse=True)
+        all_skills = set()
 
-top_roles = sorted_roles[:3]
+        for skills_list in job_roles.values():
+            all_skills.update(skills_list)
 
-st.subheader("🏆 Top Career Recommendations")
+        for skill in all_skills:
+            if skill in resume_text:
+                user_skills.append(skill)
 
-for role, score in top_roles:
+    user_skills = list(set(user_skills))
 
-    score = int(score)
+    if not user_skills:
+        st.error("Please enter skills or upload resume")
+        st.stop()
 
-    st.success(f"🎯 {role}")
-    st.write(f"Eligibility Score: {score}%")
+    scores = {}
 
-    if role in salary_data:
-        st.write(f"💰 Average Salary: {salary_data[role]}")
+    for role, req_skills in job_roles.items():
 
-    missing = [s for s in job_roles[role] if s not in user_skills]
+        match = len(set(user_skills) & set(req_skills))
 
-    if missing:
-        st.write("📚 Skills to Improve:")
-        for m in missing[:4]:
-            st.write("-", m)
+        score = (match / len(req_skills)) * 100
 
-    st.write("---")
+        scores[role] = score
 
-st.balloons()
+    # Sort roles
+    sorted_roles = sorted(scores.items(), key=lambda x: x[1], reverse=True)
 
+    top_roles = sorted_roles[:3]
+
+    st.subheader("🏆 Top Career Recommendations")
+
+    for role, score in top_roles:
+
+        score = int(score)
+
+        st.success(f"🎯 {role}")
+        st.write(f"Eligibility Score: {score}%")
+
+        if role in salary_data:
+            st.write(f"💰 Average Salary: {salary_data[role]}")
+
+        missing = [s for s in job_roles[role] if s not in user_skills]
+
+        if missing:
+            st.write("📚 Skills to Improve:")
+            for m in missing[:4]:
+                st.write("-", m)
+
+        st.write("---")
+
+    st.balloons()
