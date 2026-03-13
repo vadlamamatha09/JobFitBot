@@ -1,207 +1,222 @@
 import streamlit as st
-import random
+import matplotlib.pyplot as plt
 
-st.title("🤖 JobFitBot - AI Career Advisor")
-st.caption("AI-powered career prediction system based on skills and resume analysis")
-st.write("Find the best career based on your skills or resume")
+st.set_page_config(page_title="JobFitBot AI", page_icon="🤖", layout="wide")
 
-# ---------------- EDUCATION ----------------
+# ---------- CUSTOM UI ----------
 
-education = st.selectbox("Education", ["B.Tech","Degree","MBA","M.Tech"])
+st.markdown("""
+<style>
 
-branches = {
-"B.Tech":["Computer Science","Information Technology","Electronics","Mechanical","Civil","AI & ML","Data Science"],
-"Degree":["BSc Computer Science","BCom","BBA","BA"],
-"MBA":["Finance","Marketing","HR","Business Analytics"],
-"M.Tech":["AI","Data Science","Cyber Security","Software Engineering"]
+.main {
+background: linear-gradient(to right, #4facfe, #00f2fe);
 }
 
-branch = st.selectbox("Branch", branches[education])
-
-skills_input = st.text_input("Enter your skills (example: python, sql, machine learning)")
-certification = st.selectbox("Certification",["Yes","No"])
-experience = st.slider("Years of Experience",0,10)
-
-# ---------------- JOB DATABASE ----------------
-job_roles = {
-
-# AI & Data
-"Data Scientist":["python","machine learning","statistics","pandas","numpy","data analysis"],
-"Machine Learning Engineer":["python","machine learning","deep learning","tensorflow","pytorch"],
-"AI Engineer":["python","deep learning","nlp","computer vision"],
-"Data Analyst":["excel","sql","power bi","tableau","data analysis"],
-"Data Engineer":["python","sql","spark","hadoop","etl"],
-"Business Intelligence Analyst":["power bi","tableau","sql","data visualization"],
-"Statistician":["statistics","r","data analysis"],
-
-# Software Development
-"Software Developer":["java","python","c++","algorithms","data structures"],
-"Frontend Developer":["html","css","javascript","react","angular"],
-"Backend Developer":["java","python","node","spring","api"],
-"Full Stack Developer":["html","css","javascript","node","react","mongodb"],
-"Web Developer":["html","css","javascript","php","wordpress"],
-"API Developer":["api","python","node","rest"],
-"Game Developer":["unity","c#","game development"],
-
-# Mobile
-"Mobile App Developer":["android","kotlin","flutter","react native"],
-"Android Developer":["android","kotlin","java"],
-"IOS Developer":["swift","ios","mobile development"],
-
-# DevOps & Cloud
-"DevOps Engineer":["docker","kubernetes","linux","aws","ci/cd"],
-"Cloud Engineer":["aws","azure","cloud","terraform","linux"],
-"Site Reliability Engineer":["linux","cloud","monitoring","devops"],
-"Cloud Architect":["cloud","aws","architecture"],
-
-# Cyber Security
-"Cyber Security Analyst":["cyber security","network security","ethical hacking"],
-"Penetration Tester":["ethical hacking","penetration testing","security"],
-"Security Engineer":["security","network","linux"],
-"Security Consultant":["cyber security","risk","security"],
-
-# Blockchain
-"Blockchain Developer":["blockchain","solidity","ethereum","web3"],
-
-# Testing
-"QA Engineer":["testing","automation","selenium","manual testing"],
-"Automation Tester":["selenium","automation testing","python"],
-
-# Design
-"UI UX Designer":["figma","ui design","ux design","prototyping"],
-"Graphic Designer":["photoshop","illustrator","design"],
-"Product Designer":["design","figma","ui","ux"],
-"Animator":["animation","blender","3d"],
-"Video Editor":["video editing","premiere pro","after effects"],
-
-# Business
-"Business Analyst":["excel","sql","business analysis","communication"],
-"Product Manager":["product management","strategy","communication"],
-"Project Manager":["project management","agile","scrum"],
-"Operations Manager":["operations","management","strategy"],
-
-# Marketing
-"Digital Marketing Specialist":["seo","social media","google ads"],
-"SEO Specialist":["seo","analytics","keyword research"],
-"Content Marketing Manager":["content marketing","seo","writing"],
-"Social Media Manager":["social media","marketing","branding"],
-"Brand Manager":["branding","marketing","strategy"],
-
-# Sales
-"Sales Executive":["sales","communication","negotiation"],
-"Sales Manager":["sales","leadership","strategy"],
-"Business Development Manager":["business development","sales","strategy"],
-
-# Finance
-"Financial Analyst":["finance","excel","financial modeling"],
-"Accountant":["accounting","finance","tax"],
-"Investment Banker":["finance","investment","analysis"],
-"Risk Analyst":["risk","finance","analysis"],
-
-# HR
-"HR Executive":["recruitment","hr","communication"],
-"HR Manager":["hr management","recruitment","leadership"],
-"Talent Acquisition Specialist":["recruitment","hiring","communication"],
-
-# Education
-"Teacher":["teaching","communication","subject knowledge"],
-"Lecturer":["teaching","research","presentation"],
-"Professor":["research","teaching","publication"],
-
-# Misc Tech
-"Network Engineer":["networking","routers","switches"],
-"Database Administrator":["sql","database","oracle"],
-"System Administrator":["linux","servers","network"],
-"IT Support Specialist":["technical support","network","troubleshooting"]
-}
-# ---------------- SALARY_DATA ----------------
-salary_data = {
-"Data Scientist":"₹10L - ₹25L",
-"Machine Learning Engineer":"₹12L - ₹30L",
-"AI Engineer":"₹12L - ₹28L",
-"Data Analyst":"₹5L - ₹12L",
-"Software Developer":"₹6L - ₹16L",
-"Frontend Developer":"₹5L - ₹15L",
-"Backend Developer":"₹6L - ₹18L",
-"Full Stack Developer":"₹7L - ₹20L",
-"DevOps Engineer":"₹10L - ₹25L",
-"Cloud Engineer":"₹12L - ₹28L",
-"Cyber Security Analyst":"₹8L - ₹22L"
+h1 {
+color: white;
 }
 
-# ---------------- RESUME UPLOAD ----------------
+.stButton>button {
+background-color:#ff6b6b;
+color:white;
+border-radius:10px;
+font-size:16px;
+}
 
-st.header("Upload Resume (Optional)")
+</style>
+""", unsafe_allow_html=True)
 
-resume_file = st.file_uploader("Upload Resume (txt or pdf)", type=["txt","pdf"])
+# ---------- HEADER ----------
+
+st.markdown(
+"<h1 style='text-align:center;'>🤖 JobFitBot – AI Career Advisor</h1>",
+unsafe_allow_html=True
+)
+
+st.markdown(
+"<p style='text-align:center;font-size:18px;'>AI system that predicts the best career and job readiness</p>",
+unsafe_allow_html=True
+)
+
+st.write("---")
+
+# ---------- MODE ----------
+
+mode = st.radio(
+"Choose Mode",
+["🚀 Urgent Job Needed","📈 Career Guidance"]
+)
+
+# ---------- EDUCATION ----------
+
+education = st.selectbox(
+"Education",
+["B.Tech","Degree","MBA","M.Tech"]
+)
+
+# ---------- SKILLS ----------
+
+skills = st.text_input(
+"Enter your skills (example: python, sql, machine learning)"
+)
+
+skills_lower = skills.lower()
+
+# ---------- RESUME UPLOAD ----------
+
+resume = st.file_uploader("Upload Resume", type=["txt"])
 
 resume_text = ""
 
-if resume_file is not None:
-    resume_text = resume_file.read().decode("latin-1").lower()
+if resume:
+    resume_text = str(resume.read())
     st.success("Resume uploaded successfully")
-# ---------------- CAREER PREDICTION ----------------
 
-if st.button("Predict Career"):
+st.write("---")
 
-    user_skills = []
+# ---------- JOB READINESS SCORE ----------
 
-    # Skills from text input
-    if skills_input:
-        user_skills += [s.strip().lower() for s in skills_input.split(",")]
+score = 0
 
-    # Skills from resume
-    if resume_text:
+if "python" in skills_lower:
+    score += 30
+if "sql" in skills_lower:
+    score += 25
+if "machine learning" in skills_lower:
+    score += 25
+if "project" in skills_lower:
+    score += 20
 
-        all_skills = set()
+st.subheader("🎯 Job Readiness Score")
 
-        for skills_list in job_roles.values():
-            all_skills.update(skills_list)
+st.progress(score/100)
 
-        for skill in all_skills:
-            if skill in resume_text:
-                user_skills.append(skill)
+st.write(score,"/100")
 
-    user_skills = list(set(user_skills))
+st.write("---")
 
-    if not user_skills:
-        st.error("Please enter skills or upload resume")
-        st.stop()
+# ---------- URGENT JOB MODE ----------
 
-    scores = {}
+if mode == "🚀 Urgent Job Needed":
 
-    for role, req_skills in job_roles.items():
+    st.subheader("💼 Immediate Job Matches")
 
-        match = len(set(user_skills) & set(req_skills))
+    if "python" in skills_lower:
+        st.success("Python Developer")
 
-        score = (match / len(req_skills)) * 100
+    elif "sql" in skills_lower:
+        st.success("Data Analyst")
 
-        scores[role] = score
+    elif "testing" in skills_lower:
+        st.success("Software Tester")
 
-    # Sort roles
-    sorted_roles = sorted(scores.items(), key=lambda x: x[1], reverse=True)
+    else:
+        st.warning("Few job matches found with current skills")
 
-    top_roles = sorted_roles[:3]
+# ---------- CAREER GUIDANCE ----------
 
-    st.subheader("🏆 Top Career Recommendations")
+else:
 
-    for role, score in top_roles:
+    st.subheader("🏆 Top Career Matches")
 
-        score = int(score)
+    roles = []
+    scores = []
 
-        st.success(f"🎯 {role}")
-        st.write(f"Eligibility Score: {score}%")
+    if "machine learning" in skills_lower:
+        roles.append("ML Engineer")
+        scores.append(90)
 
-        if role in salary_data:
-            st.write(f"💰 Average Salary: {salary_data[role]}")
+    if "python" in skills_lower and "statistics" in skills_lower:
+        roles.append("Data Scientist")
+        scores.append(85)
 
-        missing = [s for s in job_roles[role] if s not in user_skills]
+    if "sql" in skills_lower:
+        roles.append("Data Analyst")
+        scores.append(80)
 
-        if missing:
-            st.write("📚 Skills to Improve:")
-            for m in missing[:4]:
-                st.write("-", m)
+    if "html" in skills_lower or "css" in skills_lower:
+        roles.append("Web Developer")
+        scores.append(75)
 
-        st.write("---")
+    if roles:
 
-    st.balloons()
+        for r,s in zip(roles,scores):
+            st.success(f"{r} – {s}% match")
+
+        # ---------- CHART ----------
+
+        fig = plt.figure()
+
+        plt.bar(roles, scores)
+
+        plt.title("Career Match Analysis")
+
+        plt.xlabel("Job Roles")
+
+        plt.ylabel("Match %")
+
+        st.pyplot(fig)
+
+    else:
+
+        st.warning("No strong career matches detected")
+
+# ---------- SKILL GAP ----------
+
+st.write("---")
+
+st.subheader("⚠ Skill Gap Analysis")
+
+if "python" in skills_lower and "sql" not in skills_lower:
+    st.warning("Learning SQL can improve your chances")
+
+if "machine learning" in skills_lower and "statistics" not in skills_lower:
+    st.warning("Statistics required for ML roles")
+
+if "html" in skills_lower and "javascript" not in skills_lower:
+    st.warning("Learn JavaScript for better web jobs")
+
+# ---------- JOB LINKS ----------
+
+st.write("---")
+
+st.subheader("💼 Apply for Jobs")
+
+st.markdown("Data Analyst Jobs: https://www.naukri.com/data-analyst-jobs")
+
+st.markdown("Python Developer Jobs: https://www.linkedin.com/jobs/")
+
+st.markdown("Software Tester Jobs: https://www.indeed.com/jobs?q=software+tester")
+
+# ---------- CHATBOT ----------
+
+st.write("---")
+
+st.subheader("🤖 Ask CareerBot")
+
+question = st.text_input("Ask a career question")
+
+if question:
+
+    q = question.lower()
+
+    if "data scientist" in q:
+        st.write("Skills: Python, Statistics, Machine Learning")
+
+    elif "ai engineer" in q:
+        st.write("Skills: Python, Deep Learning, TensorFlow")
+
+    elif "web developer" in q:
+        st.write("Skills: HTML, CSS, JavaScript")
+
+    else:
+        st.write("Focus on coding skills and building projects")
+
+# ---------- FOOTER ----------
+
+st.write("---")
+
+st.markdown(
+"<p style='text-align:center;'>Developed using Streamlit | JobFitBot AI</p>",
+unsafe_allow_html=True
+)
