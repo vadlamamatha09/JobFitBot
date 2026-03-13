@@ -1,5 +1,4 @@
 import streamlit as st
-import matplotlib.pyplot as plt
 
 st.set_page_config(page_title="JobFitBot AI", page_icon="🤖", layout="wide")
 
@@ -144,22 +143,15 @@ else:
             st.success(f"{r} – {s}% match")
 
         # ---------- CHART ----------
-
-        fig = plt.figure()
-
-        plt.bar(roles, scores)
-
-        plt.title("Career Match Analysis")
-
-        plt.xlabel("Job Roles")
-
-        plt.ylabel("Match %")
-
-        st.pyplot(fig)
-
-    else:
-
-        st.warning("No strong career matches detected")
+import pandas as pd
+data = {
+    "Role": roles,
+    "Match %": scores
+}
+df = pd.DataFrame(data)
+st.bar_chart(df.set_index("Role"))
+else:
+st.warning("No strong career matches detected")
 
 # ---------- SKILL GAP ----------
 
